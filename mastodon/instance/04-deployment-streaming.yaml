@@ -1,0 +1,51 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mastodon-streaming
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app: mastodon-streaming
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mastodon-streaming
+  labels:
+    app: mastodon-streaming
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mastodon-streaming
+    spec:
+      containers:
+      - name: streaming
+        image: gargron/mastodon:v2.5.0
+        command: ["/bin/ash", "-c", "yarn start"]
+        ports:
+        - name: http
+          containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: config
+        - secretRef:
+            name: secrets
+        env:
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: POSTGRES_PASSWORD
+        - name: PORT
+          value: "3000"
+        resources:
+          requests:
+            memory: 350Mi
+            cpu: 100m

@@ -1,0 +1,49 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mastodon-web
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: mastodon-web
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mastodon-web
+  labels:
+    app: mastodon-web
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mastodon-web
+    spec:
+      containers:
+      - name: web
+        image: gargron/mastodon:v2.5.0
+        command: ["/bin/ash", "-c", "bundle exec puma -C config/puma.rb -b tcp://0.0.0.0:3000"]
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: config
+        - secretRef:
+            name: secrets
+        env:
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: POSTGRES_PASSWORD
+        resources:
+          requests:
+            memory: 350Mi
+            cpu: 100m

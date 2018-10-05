@@ -1,0 +1,15 @@
+apiVersion: kubedb.com/v1alpha1
+kind: Postgres
+metadata:
+  name: postgres
+spec:
+  version: "10.2"
+  replicas: 1
+  doNotPause: true
+  storage:
+    storageClassName: "rook-ceph-block"
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi

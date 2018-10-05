@@ -1,0 +1,15 @@
+apiVersion: kubedb.com/v1alpha1
+kind: Redis
+metadata:
+  name: redis
+spec:
+  version: "4"
+  replicas: 1
+  doNotPause: true
+  storage:
+    storageClassName: "rook-ceph-block"
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 100Mi

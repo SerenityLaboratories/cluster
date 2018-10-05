@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: mastodon
+spec:
+  backoffLimit: 2
+  parallelism: 1
+  completions: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: db-migrate
+        image: gargron/mastodon:v2.5.0
+        command: ["/bin/ash", "-c", "bundle exec rails db:migrate:setup"]
+        envFrom:
+        - configMapRef:
+            name: config
+        - secretRef:
+            name: secrets
+        env:
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: POSTGRES_PASSWORD
+        resources:
+          requests:
+            memory: 350Mi
+            cpu: 100m
