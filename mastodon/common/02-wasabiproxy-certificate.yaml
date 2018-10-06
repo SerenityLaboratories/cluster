@@ -1,0 +1,39 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: files-deadinsi-de
+  namespace: mastodon-common
+spec:
+  secretName: files-deadinsi.de
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  commonName: files.deadinsi.de
+  dnsNames:
+  - files.deadinsi.de
+  acme:
+    config:
+    - http01:
+        ingressClass: nginx
+      domains:
+      - files.deadinsi.de
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: pgadmin-deadinsi-de
+  namespace: mastodon-common
+spec:
+  secretName: pgadmin-deadinsi.de
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  commonName: pgadmin.deadinsi.de
+  dnsNames:
+  - pgadmin.deadinsi.de
+  acme:
+    config:
+    - http01:
+        ingressClass: nginx
+      domains:
+      - pgadmin.deadinsi.de

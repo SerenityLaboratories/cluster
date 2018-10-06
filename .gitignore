@@ -1,1 +1,2 @@
 mastodon/config/02-secrets.yaml
+mastodon/common/00-secrets.yaml
