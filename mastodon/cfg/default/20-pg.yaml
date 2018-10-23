@@ -3,13 +3,12 @@ kind: Postgres
 metadata:
   name: postgres
 spec:
-  version: "10.2"
+  version: "10.2-v1"
   replicas: 1
   doNotPause: true
   storage:
-    storageClassName: "rook-ceph-block"
     accessModes:
     - ReadWriteOnce
     resources:
       requests:
-        storage: 10Gi
+        storage: 50Gi

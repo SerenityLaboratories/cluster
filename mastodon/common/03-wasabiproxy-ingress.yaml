@@ -1,18 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: files-deadinsi-de
+  name: files-slis-icu
   namespace: mastodon-common
 spec:
   rules:
-  - host: files.deadinsi.de
+  - host: files.slis.icu
     http:
       paths:
       - backend:
           serviceName: wasabi-proxy
           servicePort: 80
-        path: /k8s-deadinside-media
+        path: /deadinside-media
+      - backend:
+          serviceName: wasabi-proxy
+          servicePort: 80
+        path: /elle-systems-media
   tls:
   - hosts:
-    - files.deadinsi.de
-    secretName: files-deadinsi.de
+    - files.slis.icu
+    secretName: files-slis-icu

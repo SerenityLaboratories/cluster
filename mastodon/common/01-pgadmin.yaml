@@ -61,4 +61,4 @@ spec:
   resources:
     requests:
       storage: 100Mi
-  storageClassName: rook-ceph-block
+  storageClassName: block-unreplicated

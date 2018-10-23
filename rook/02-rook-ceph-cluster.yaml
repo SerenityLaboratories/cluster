@@ -54,22 +54,18 @@ metadata:
   name: rook-ceph
   namespace: rook-ceph
 spec:
-  dataDirHostPath: /var/lib/rook
+  dataDirHostPath: /data/rook
   serviceAccount: rook-ceph-cluster
   mon:
     count: 3
-    allowMultiplePerNode: true
+    allowMultiplePerNode: false
   dashboard:
     enabled: true
   network:
     hostNetwork: false
   resources:
   storage:
-    useAllNodes: false
-    nodes:
-    - name: "node-1"
-    - name: "node-2"
-    - name: "node-3"
+    useAllNodes: true
     useAllDevices: false
     deviceFilter:
     location:

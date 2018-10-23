@@ -5,7 +5,7 @@ metadata:
   labels:
     app: mastodon-sidekiq
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -13,8 +13,8 @@ spec:
     spec:
       containers:
       - name: sidekiq
-        image: gargron/mastodon:v2.5.0
-        command: ["/bin/ash", "-c", "bundle exec sidekiq -q default -q mailers -q pull -q push"]
+        image: gargron/mastodon:v2.6.0rc1
+        command: ["/bin/ash", "-c", "bundle exec sidekiq -c 5 -q default -q mailers -q pull -q push"]
         ports:
         - containerPort: 3000
         envFrom:
@@ -22,6 +22,8 @@ spec:
             name: config
         - secretRef:
             name: secrets
+        - secretRef:
+            name: aws
         env:
         - name: DB_PASS
           valueFrom:
@@ -30,5 +32,21 @@ spec:
               key: POSTGRES_PASSWORD
         resources:
           requests:
-            memory: 350Mi
-            cpu: 100m
+            memory: "1Gi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "200m"
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mastodon-sidekiq
+spec:
+  maxReplicas: 20
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: mastodon-sidekiq
+  targetCPUUtilizationPercentage: 80

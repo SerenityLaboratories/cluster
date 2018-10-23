@@ -2,7 +2,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: db-migrate
-  namespace: mastodon
 spec:
   backoffLimit: 2
   parallelism: 1
@@ -12,8 +11,8 @@ spec:
       restartPolicy: Never
       containers:
       - name: db-migrate
-        image: gargron/mastodon:v2.5.0
-        command: ["/bin/ash", "-c", "bundle exec rails db:migrate:setup"]
+        image: gargron/mastodon:v2.6.0rc1
+        command: ["/bin/ash", "-c", "bundle exec rails db:migrate"]
         envFrom:
         - configMapRef:
             name: config

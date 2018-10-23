@@ -1,0 +1,37 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: ceph-tq-slis-icu
+  namespace: rook-ceph
+spec:
+  secretName: ceph-tq-slis-icu
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  commonName: ceph.tq.slis.icu
+  dnsNames:
+  - ceph.tq.slis.icu
+  acme:
+    config:
+    - dns01:
+        provider: cloudflare
+      domains:
+      - 'ceph.tq.slis.icu'
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rook-ceph-dash
+  namespace: rook-ceph
+spec:
+  rules:
+  - host: ceph.tq.slis.icu
+    http:
+      paths:
+      - backend:
+          serviceName: rook-ceph-mgr-dashboard
+          servicePort: 7000
+  tls:
+  - hosts:
+    - ceph.tq.slis.icu
+    secretName: ceph-tq-slis-icu

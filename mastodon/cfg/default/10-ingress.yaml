@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: elle-systems
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 32m
+spec:
+  rules:
+  - host: elle.systems
+    http:
+      paths:
+      - backend:
+          serviceName: mastodon-web
+          servicePort: 80
+        path: /
+      - backend:
+          serviceName: mastodon-streaming
+          servicePort: 80
+        path: /api/v1/streaming
+  - host: www.elle.systems
+    http:
+      paths:
+      - backend:
+          serviceName: mastodon-web
+          servicePort: 80
+        path: /
+      - backend:
+          serviceName: mastodon-streaming
+          servicePort: 80
+        path: /api/v1/streaming
+  tls:
+  - secretName: elle-systems

@@ -19,7 +19,7 @@ metadata:
   labels:
     app: mastodon-streaming
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: streaming
-        image: gargron/mastodon:v2.5.0
+        image: gargron/mastodon:v2.6.0rc1
         command: ["/bin/ash", "-c", "yarn start"]
         ports:
         - name: http
@@ -37,6 +37,17 @@ spec:
             name: config
         - secretRef:
             name: secrets
+        - secretRef:
+            name: aws
+        livenessProbe:
+          httpGet:
+            path: /api/v1/streaming/health
+            port: 3000
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+          initialDelaySeconds: 3
+          periodSeconds: 10
         env:
         - name: DB_PASS
           valueFrom:
@@ -46,6 +57,22 @@ spec:
         - name: PORT
           value: "3000"
         resources:
-          requests:
-            memory: 350Mi
-            cpu: 100m
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "256Mi"
+                cpu: "100m"
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mastodon-streaming
+spec:
+  maxReplicas: 20
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: mastodon-streaming
+  targetCPUUtilizationPercentage: 30
