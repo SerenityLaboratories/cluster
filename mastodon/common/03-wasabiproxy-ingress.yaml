@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: files-slis-icu
+  namespace: mastodon-common
+spec:
+  rules:
+  - host: files.slis.icu
+    http:
+      paths:
+      - backend:
+          serviceName: wasabi-proxy
+          servicePort: 80
+        path: /deadinside-media
+      - backend:
+          serviceName: wasabi-proxy
+          servicePort: 80
+        path: /elle-systems-media
+  tls:
+  - hosts:
+    - files.slis.icu
+    secretName: files-slis-icu

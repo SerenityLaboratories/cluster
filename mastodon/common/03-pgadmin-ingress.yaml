@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: pgadmin
+  namespace: mastodon-common
+spec:
+  rules:
+  - host: pgadmin.tq.slis.icu
+    http:
+      paths:
+      - backend:
+          serviceName: pgadmin
+          servicePort: 80
+  tls:
+  - hosts:
+    - pgadmin.tq.slis.icu
+    secretName: pgadmin-tq-slis-icu

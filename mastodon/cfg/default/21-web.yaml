@@ -1,0 +1,89 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mastodon-web
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: mastodon-web
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mastodon-web
+  labels:
+    app: mastodon-web
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: mastodon-web
+    spec:
+      containers:
+      - name: web
+        image: gargron/mastodon:v2.6.0rc1
+        command: ["/bin/ash", "-c", "bundle exec puma -C config/puma.rb -b tcp://0.0.0.0:3000"]
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: config
+        - secretRef:
+            name: secrets
+        - secretRef:
+            name: aws
+        livenessProbe:
+          httpGet:
+            path: /api/v1/instance
+            port: 3000
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/instance
+            port: 3000
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        env:
+        - name: WEB_CONCURRENCY
+          value: "2"
+        - name: MAX_THREADS
+          value: "10"
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: POSTGRES_PASSWORD
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "300m"
+          limits:
+            memory: "2Gi"
+            cpu: "300m"
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mastodon-web
+spec:
+  maxReplicas: 20
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: mastodon-web
+  targetCPUUtilizationPercentage: 50

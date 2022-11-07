@@ -1,0 +1,37 @@
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: unreplicated
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 1
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: block-unreplicated
+provisioner: ceph.rook.io/block
+parameters:
+  pool: unreplicated
+  clusterNamespace: rook-ceph
+---
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: replicated
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 2
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: block-replicated
+  annotations:
+     storageclass.kubernetes.io/is-default-class: "true"
+provisioner: ceph.rook.io/block
+parameters:
+  pool: replicated
+  clusterNamespace: rook-ceph

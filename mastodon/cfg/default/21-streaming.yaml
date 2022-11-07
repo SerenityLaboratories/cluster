@@ -1,0 +1,78 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: mastodon-streaming
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app: mastodon-streaming
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mastodon-streaming
+  labels:
+    app: mastodon-streaming
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: mastodon-streaming
+    spec:
+      containers:
+      - name: streaming
+        image: gargron/mastodon:v2.6.0rc1
+        command: ["/bin/ash", "-c", "yarn start"]
+        ports:
+        - name: http
+          containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: config
+        - secretRef:
+            name: secrets
+        - secretRef:
+            name: aws
+        livenessProbe:
+          httpGet:
+            path: /api/v1/streaming/health
+            port: 3000
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        env:
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: postgres-auth
+              key: POSTGRES_PASSWORD
+        - name: PORT
+          value: "3000"
+        resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "256Mi"
+                cpu: "100m"
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mastodon-streaming
+spec:
+  maxReplicas: 20
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1beta2
+    kind: Deployment
+    name: mastodon-streaming
+  targetCPUUtilizationPercentage: 30

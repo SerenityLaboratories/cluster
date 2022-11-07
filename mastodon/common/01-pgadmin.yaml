@@ -1,0 +1,64 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: pgadmin
+  namespace: mastodon-common
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app: pgadmin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pgadmin
+  name: pgadmin
+  namespace: mastodon-common
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+      - image: dpage/pgadmin4:latest
+        imagePullPolicy: Always
+        name: pgadmin
+        volumeMounts:
+        - mountPath: /var/lib/pgadmin
+          name: data
+        env:
+        - name: PGADMIN_PORT
+          value: "80"
+        envFrom:
+        - secretRef:
+            name: pgadmin
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pgadmin
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin
+  namespace: mastodon-common
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  storageClassName: block-unreplicated

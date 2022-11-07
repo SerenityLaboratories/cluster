@@ -1,0 +1,6 @@
+/mastodon/cfg/*
+!/mastodon/cfg/default/
+
+# secrets
+/certman/01-cloudflare-api-key.yaml
+/mastodon/common/00-secrets.yaml
